@@ -11,8 +11,12 @@ export class FavouriteLocationService {
     private favouriteLocationRepository: Repository<FavouriteLocation>,
   ) {}
 
-  async getAllFavouriteLocations(user: User): Promise<FavouriteLocation[]> {
-    return this.favouriteLocationRepository.find({ where: { user } });
+  async getAllFavouriteLocations(user: User): Promise<any> {
+    const data = await this.favouriteLocationRepository.find({ where: { user } });
+    if(data && data?.length > 0){
+      return {message: 'Favourite locations fetched successfully.', data};
+    }
+    return {message: 'No Favourite locations found.', data: []};
   }
 
   async addFavouriteLocation(city: string, user: User): Promise<FavouriteLocation> {    
@@ -30,12 +34,13 @@ export class FavouriteLocationService {
     return this.favouriteLocationRepository.save(favouriteLocation);
   }
 
-  async deleteFavouriteLocation(locationId: number, user: User): Promise<void> {
+  async deleteFavouriteLocation(locationId: number, user: User): Promise<any> {
     // Check if user has permission to delete location from favourites list
     const location = await this.favouriteLocationRepository.findOne({ where: { id: locationId, user } });
     if (!location) {
       throw new NotFoundException('Location not found.');
     }
     await this.favouriteLocationRepository.delete(locationId);
+    return {message: 'Favourite locations deleted successfully.'};
   }
 }
