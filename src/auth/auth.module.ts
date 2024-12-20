@@ -8,8 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity'; 
 import { UserService } from './user.service';
 
-console.log('process.env.JWT_SECRET : ', process.env.JWT_SECRET);
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([User ]),
@@ -21,7 +19,7 @@ console.log('process.env.JWT_SECRET : ', process.env.JWT_SECRET);
   ],
   providers: [AuthService, JwtStrategy, UserService],
   controllers: [AuthController],
-  exports: [AuthService, AuthController],
+  exports: [AuthService],
 })
 
 export class AuthModule {}
