@@ -1,8 +1,7 @@
-// src/auth/auth.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UserService } from './user.service'; // Import the missing service
+import { UserService } from './user.service'; 
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -20,9 +19,9 @@ describe('AuthController', () => {
           },
         },
         {
-          provide: UserService, // Mock the UserService
+          provide: UserService,
           useValue: {
-            findUserByUsername: jest.fn(), // Example mock method
+            findUserByUsername: jest.fn(),
           },
         },
       ],
@@ -32,9 +31,25 @@ describe('AuthController', () => {
     authService = module.get<AuthService>(AuthService);
   });
 
+
+  describe('register', () => {
+    it('should return access token and success message on registration', async () => {
+      const mockRegisterDto = { username: 'newUser@yopmail.com', password: 'newPassword' };
+      const mockResponse = {
+        access_token: 'mockAccessToken',
+        message: 'Registration successful',
+      };
+
+      jest.spyOn(authService, 'register').mockResolvedValue(mockResponse);
+
+      expect(await authController.register(mockRegisterDto)).toEqual(mockResponse);
+      expect(authService.register).toHaveBeenCalledWith(mockRegisterDto);
+    });
+  });
+
   describe('login', () => {
     it('should return access token and success message on valid credentials', async () => {
-      const mockLoginDto = { username: 'RIDDHI@yopmail.com', password: 'RIDDHI' };
+      const mockLoginDto = { username: 'newUser@yopmail.com', password: 'newPassword' };
       const mockResponse = {
         access_token: 'mockAccessToken',
         message: 'Login successful',
@@ -55,18 +70,4 @@ describe('AuthController', () => {
     });
   });
 
-  describe('register', () => {
-    it('should return access token and success message on registration', async () => {
-      const mockRegisterDto = { username: 'newUser@yopmail.com', password: 'newPassword' };
-      const mockResponse = {
-        access_token: 'mockAccessToken',
-        message: 'Registration successful',
-      };
-
-      jest.spyOn(authService, 'register').mockResolvedValue(mockResponse);
-
-      expect(await authController.register(mockRegisterDto)).toEqual(mockResponse);
-      expect(authService.register).toHaveBeenCalledWith(mockRegisterDto);
-    });
-  });
 });
