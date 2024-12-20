@@ -2,6 +2,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { UserService } from './user.service'; // Import the missing service
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -10,40 +11,62 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: {
+            login: jest.fn(),
+            register: jest.fn(),
+          },
+        },
+        {
+          provide: UserService, // Mock the UserService
+          useValue: {
+            findUserByUsername: jest.fn(), // Example mock method
+          },
+        },
+      ],
     }).compile();
 
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
   });
 
-  describe('register', () => {
-    it('should register a user and return an access token', async () => {
-      const user = { username: 'testuser@yopmail.com', password: 'testpass' };
-      const accessToken = 'mock-access-token'; // Mock token
-      jest.spyOn(authService, 'register').mockResolvedValue({ message: 'Register successful', access_token: accessToken });
-
-      expect(await authController.register(user)).toEqual({ access_token: accessToken });
-      expect(authService.register).toHaveBeenCalledWith(user.username, user.password);
-    });
-  });
-
   describe('login', () => {
-    it('should login a user and return an access token', async () => {
-      const user = { username: 'testuser@yopmail.com', password: 'testpass' };
-      const accessToken = 'mock-access-token'; // Mock token
-      jest.spyOn(authService, 'login').mockResolvedValue({ message: 'Login successful', access_token: accessToken });
+    it('should return access token and success message on valid credentials', async () => {
+      const mockLoginDto = { username: 'RIDDHI@yopmail.com', password: 'RIDDHI' };
+      const mockResponse = {
+        access_token: 'mockAccessToken',
+        message: 'Login successful',
+      };
 
-      expect(await authController.login(user)).toEqual({ access_token: accessToken });
-      expect(authService.login).toHaveBeenCalledWith(user.username, user.password);
+      jest.spyOn(authService, 'login').mockResolvedValue(mockResponse);
+
+      expect(await authController.login(mockLoginDto)).toEqual(mockResponse);
+      expect(authService.login).toHaveBeenCalledWith(mockLoginDto);
     });
 
     it('should throw an error for invalid credentials', async () => {
-      const user = { username: 'wronguser', password: 'wrongpass' };
+      const mockLoginDto = { username: 'invalidUser', password: 'invalidPassword' };
       jest.spyOn(authService, 'login').mockRejectedValue(new Error('Invalid credentials'));
 
-      await expect(authController.login(user)).rejects.toThrow('Invalid credentials');
-      expect(authService.login).toHaveBeenCalledWith(user.username, user.password);
+      await expect(authController.login(mockLoginDto)).rejects.toThrow('Invalid credentials');
+      expect(authService.login).toHaveBeenCalledWith(mockLoginDto);
+    });
+  });
+
+  describe('register', () => {
+    it('should return access token and success message on registration', async () => {
+      const mockRegisterDto = { username: 'newUser@yopmail.com', password: 'newPassword' };
+      const mockResponse = {
+        access_token: 'mockAccessToken',
+        message: 'Registration successful',
+      };
+
+      jest.spyOn(authService, 'register').mockResolvedValue(mockResponse);
+
+      expect(await authController.register(mockRegisterDto)).toEqual(mockResponse);
+      expect(authService.register).toHaveBeenCalledWith(mockRegisterDto);
     });
   });
 });
