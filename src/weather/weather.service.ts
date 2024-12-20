@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Cache } from '@nestjs/cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ExternalApiService } from 'src/external-api/external-api.service';
+import { ExternalApiService } from '../external-api/external-api.service';
 
 @Injectable()
 export class WeatherService {
@@ -30,7 +30,10 @@ export class WeatherService {
       return weatherData;
       
     } catch (error) {
-      throw new Error('Failed to fetch weather data');
+      return {
+        message: 'Failed to fetch weather data or city not found',
+        status: 401
+      }
     }
   }
 
@@ -54,7 +57,10 @@ export class WeatherService {
       return forecastData;
       
     } catch (error) {
-      throw new Error('Failed to fetch forecast data');
+      return {
+        message: 'Failed to fetch weather forecast data or city not found',
+        status: 401
+      }
     }
   }
 }
